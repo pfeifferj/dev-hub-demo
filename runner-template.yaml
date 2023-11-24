@@ -1,0 +1,69 @@
+apiVersion: backstage.io/v1beta2
+kind: Template
+metadata:
+  name: gitlab-runner-deployment
+  title: GitLab Runner Deployment on OpenShift
+  description: Deploys a GitLab Runner CRD in a user-specified namespace on a selected OpenShift cluster.
+  tags:
+    - ci
+    - openshift
+    - gitlab
+
+spec:
+  owner: team-cicd
+  type: service
+
+  parameters:
+    - title: GitLab Runner Configuration
+      required:
+        - gitlabUrl
+        - runnerToken
+        - openshiftCluster
+        - namespace
+      properties:
+        gitlabUrl:
+          type: string
+          title: GitLab URL
+          description: The URL of your GitLab instance.
+        runnerToken:
+          type: string
+          title: Runner Registration Token
+          description: Token for registering the runner with GitLab.
+        openshiftCluster:
+          type: string
+          title: OpenShift Cluster
+          description: The OpenShift cluster where the runner will be deployed.
+          enum:
+            - ClusterA
+            - ClusterB
+            - ClusterC
+        namespace:
+          type: string
+          title: OpenShift Namespace
+          description: The OpenShift namespace where the runner will be deployed.
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base Configuration
+      action: fetch:cookiecutter
+      input:
+        url: './base-gitlab-runner-template'
+        values:
+          gitlabUrl: '{{ parameters.gitlabUrl }}'
+          runnerToken: '{{ parameters.runnerToken }}'
+          openshiftCluster: '{{ parameters.openshiftCluster }}'
+          namespace: '{{ parameters.namespace }}'
+
+    - id: setup-runner
+      name: Setup GitLab Runner
+      action: custom:deployToOpenShift
+      input:
+        cluster: '{{ parameters.openshiftCluster }}'
+        manifest: './generated/gitlab-runner-manifest.yaml'
+
+  output:
+    links:
+      - url: '{{ steps.setup-runner.output.dashboardUrl }}'
+        title: OpenShift Dashboard
+      - url: '{{ parameters.gitlabUrl }}/admin/runners'
+        title: GitLab Runner Settings
