@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: gitlab-runner-secret
+type: Opaque
+stringData:
+  runner-registration-token: YOUR_TOKEN_HERE
+---
+apiVersion: apps.gitlab.com/v1beta2
+kind: Runner
+metadata:
+ name: gitlab-runner
+spec:
+ gitlabUrl: https://gitlab.com
+ token: gitlab-runner-secret
+ tags: openshift
+ config: my-runner-config
