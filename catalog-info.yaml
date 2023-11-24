@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: dev-hub-demo
+  annotations:
+    github.com/project-slug: pfeifferj/dev-hub-demo
+spec:
+  type: other
+  lifecycle: unknown
+  owner: rhdh
